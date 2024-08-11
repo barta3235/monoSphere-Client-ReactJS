@@ -1,17 +1,50 @@
 import { useLoaderData } from "react-router-dom"
 import useAuthHook from "../hooks/useAuthHook";
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
+import { useState } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const JobDetails = () => {
 
     const { user } = useAuthHook()
     const job = useLoaderData();
+    const [startDate, setStartDate] = useState(new Date());
 
-    const { job_title, category, _id, deadline, description, min_price, max_price } = job || {}
+    const { job_title, category, _id, deadline, description, min_price, max_price, buyers } = job || {}
 
     const handleFromSubmission = async (e) => {
         e.preventDefault();
+        if (user?.email === buyers?.email) return toast.error('Action not permissible')
         const form = e.target;
-        const jobId= _id;
+        const jobId = _id;
+        const price = parseFloat(form.price.value);
+        if (price < parseFloat(min_price)) return toast.error('Offer more or at least equal to minimum price')
+        const comment = form.comment.value;
+        const deadline = startDate
+        const email = form.email.value;
+        const status = 'pending'
+
+        const bidData = { jobId, price, comment, deadline, job_title, category, email, buyer_email:buyers?.email, buyers, status }
+
+        console.table(bidData);
+
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/bid`, bidData)
+            console.log(response.data);
+            if (response.data.insertedId) {
+                toast.success('Bid Placed Successfully')
+            }
+        } catch (err) {
+            console.log(err);
+            toast.error(err);
+        }
+
+
+
+
     }
 
     return (
@@ -20,7 +53,7 @@ const JobDetails = () => {
             <div className='flex-1  px-4 py-7 bg-white rounded-md shadow-md md:min-h-[350px]'>
                 <div className='flex items-center justify-between'>
                     <span className='text-sm font-light text-gray-800 '>
-                        Deadline: {deadline}
+                        Deadline: {new Date(deadline).toLocaleDateString()}
                     </span>
                     <span className='px-4 py-1 text-xs text-blue-800 uppercase bg-blue-200 rounded-full '>
                         {category}
@@ -41,14 +74,14 @@ const JobDetails = () => {
                     <div className='flex items-center gap-5'>
                         <div>
                             <p className='mt-2 text-sm  text-gray-600 '>
-                                Name: Aslam Bhai
+                                Name: {buyers?.name}
                             </p>
                             <p className='mt-2 text-sm  text-gray-600 '>
-                                Email: aslamDono@gmail.com
+                                Email: {buyers?.email}
                             </p>
                         </div>
                         <div className='rounded-full object-cover overflow-hidden w-14 h-14'>
-                            {/* <img src={user?.photoURL} alt='' /> */}
+                            <img src={buyers?.photo} alt='' />
                         </div>
                     </div>
                     <p className='mt-6 text-lg font-bold text-gray-600 '>
@@ -106,6 +139,8 @@ const JobDetails = () => {
                             <label className='text-gray-700'>Deadline</label>
 
                             {/* Date Picker Input Field */}
+                            <DatePicker className="border p-2 rounded-md" selected={startDate} onChange={(date) => setStartDate(date)} />
+
                         </div>
                     </div>
 
