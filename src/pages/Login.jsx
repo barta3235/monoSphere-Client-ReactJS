@@ -5,7 +5,7 @@ import useAuthHook from "../hooks/useAuthHook";
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { IoMdEyeOff } from "react-icons/io";
-import {IoMdEye} from "react-icons/io";
+import { IoMdEye } from "react-icons/io";
 
 const Login = () => {
 
@@ -45,7 +45,7 @@ const Login = () => {
         }
     }
 
-    
+
 
 
 
@@ -143,7 +143,7 @@ const Login = () => {
                                     className='block w-full px-4 py-2 text-gray-700 bg-white border rounded-lg    focus:border-blue-400 focus:ring-opacity-40  focus:outline-none focus:ring focus:ring-blue-300'
                                     type={showpassword ? 'password' : 'text'}
                                 />
-                                <div onClick={()=>setshowPassword(!showpassword)} className="absolute right-2 top-0 cursor-pointer">
+                                <div onClick={() => setshowPassword(!showpassword)} className="absolute right-2 top-0 cursor-pointer">
                                     {
                                         showpassword ? <div className="text-[20px]"><IoMdEyeOff /></div> : <div><IoMdEye /></div>
                                     }
