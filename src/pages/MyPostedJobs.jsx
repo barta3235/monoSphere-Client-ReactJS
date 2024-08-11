@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import useAuthHook from "../hooks/useAuthHook"
 import axios from "axios"
+import toast from "react-hot-toast"
 
 const MyPostedJobs = () => {
     const [jobs, setJobs] = useState([])
@@ -9,17 +10,32 @@ const MyPostedJobs = () => {
 
 
     useEffect(() => {
-        const getData = async () => {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs/${user?.email}`)
-            setJobs(res.data)
-        }
         getData()
     }, [user])
 
+    const getData = async () => {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs/${user?.email}`)
+        setJobs(res.data)
+    }
 
 
-    const handleDelete = (id) => {
-        console.log(id)
+
+    const handleDelete = async (id) => {
+        console.log(id);
+
+        try {
+            const res = await axios.delete(`${import.meta.env.VITE_API_URL}/jobs/${id}`)
+            if (res.data.deletedCount > 0) {
+                toast.success('Job Listing Removed')
+                //refresh UI
+                getData();
+            }
+
+        } catch (err) {
+            console.log(err);
+            toast.error(err)
+        }
+
 
     }
 
