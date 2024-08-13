@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import img from '../assets/images/login.jpg'
 import logo from '../assets/images/logo.png'
 import useAuthHook from "../hooks/useAuthHook";
@@ -12,6 +12,9 @@ const Login = () => {
     const { signIn, signInWithGoogle } = useAuthHook();
     const navigate = useNavigate();
     const [showpassword, setshowPassword] = useState(true);
+    const location = useLocation();
+
+    const from = location.state || '/';
 
 
 
@@ -21,7 +24,7 @@ const Login = () => {
         try {
             await signInWithGoogle()
             toast.success('Log In Successful!')
-            navigate('/');
+            navigate(from,{replace:true});
         } catch (error) {
             console.log(error);
             toast.error(error?.message)
@@ -37,7 +40,7 @@ const Login = () => {
 
         try {
             await signIn(email, password)
-            navigate('/')
+            navigate(from,{replace:true})
             toast.success('SignIn Successful');
         } catch (error) {
             console.log(error)
