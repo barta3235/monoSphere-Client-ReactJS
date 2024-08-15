@@ -1,4 +1,4 @@
-import { useLoaderData } from "react-router-dom"
+import { useLoaderData, useNavigate } from "react-router-dom"
 import useAuthHook from "../hooks/useAuthHook";
 import DatePicker from "react-datepicker";
 
@@ -11,6 +11,7 @@ const JobDetails = () => {
 
     const { user } = useAuthHook()
     const job = useLoaderData();
+    const navigate=useNavigate();
     const [startDate, setStartDate] = useState(new Date());
 
     const { job_title, category, _id, deadline, description, min_price, max_price, buyers } = job || {}
@@ -36,6 +37,7 @@ const JobDetails = () => {
             console.log(response.data);
             if (response.data.insertedId) {
                 toast.success('Bid Placed Successfully')
+                navigate('/my-bids')
             }
         } catch (err) {
             console.log(err);

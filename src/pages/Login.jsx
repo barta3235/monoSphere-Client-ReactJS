@@ -3,18 +3,24 @@ import img from '../assets/images/login.jpg'
 import logo from '../assets/images/logo.png'
 import useAuthHook from "../hooks/useAuthHook";
 import toast from "react-hot-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoMdEyeOff } from "react-icons/io";
 import { IoMdEye } from "react-icons/io";
 
 const Login = () => {
 
-    const { signIn, signInWithGoogle } = useAuthHook();
+    const { signIn, signInWithGoogle,user, loading } = useAuthHook();
     const navigate = useNavigate();
     const [showpassword, setshowPassword] = useState(true);
     const location = useLocation();
 
     const from = location.state || '/';
+
+    useEffect(()=>{
+        if(user){
+            navigate('/')
+        }
+    },[user,navigate])
 
 
 
@@ -51,7 +57,7 @@ const Login = () => {
 
 
 
-
+    if (user || loading) return
     return (
         <div className='flex justify-center items-center min-h-[calc(100vh-306px)] my-12'>
             <div className='flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-lg  lg:max-w-4xl '>
