@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import useAuthHook from "../hooks/useAuthHook";
+import toast from "react-hot-toast";
 
 
 const MyBids = () => {
@@ -19,6 +20,14 @@ const MyBids = () => {
     }
 
     console.log(bids)
+
+    const handleStatus= async(id)=>{
+        const res= await axios.patch(`${import.meta.env.VITE_API_URL}/bid/${id}`,{status:'Complete'})
+        if(res.data.modifiedCount>0){
+            toast.success('Status Updated')
+            getData()
+        }
+    }
 
 
 
@@ -138,6 +147,7 @@ const MyBids = () => {
                                                 {/* Complete Button */}
                                                 <button
                                                     disabled={bid?.status !== 'In Progress'}
+                                                    onClick={()=>handleStatus(bid._id)}
                                                     title='Mark Complete'
                                                     className='text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none disabled:cursor-not-allowed'
                                                 >
