@@ -6,21 +6,22 @@ import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { IoMdEyeOff } from "react-icons/io";
 import { IoMdEye } from "react-icons/io";
+import axios from "axios";
 
 const Login = () => {
 
-    const { signIn, signInWithGoogle,user, loading } = useAuthHook();
+    const { signIn, signInWithGoogle, user, loading } = useAuthHook();
     const navigate = useNavigate();
     const [showpassword, setshowPassword] = useState(true);
     const location = useLocation();
 
     const from = location.state || '/';
 
-    useEffect(()=>{
-        if(user){
+    useEffect(() => {
+        if (user) {
             navigate('/')
         }
-    },[user,navigate])
+    }, [user, navigate])
 
 
 
@@ -28,9 +29,11 @@ const Login = () => {
     const handleGoogleSignIn = async () => {
 
         try {
-            await signInWithGoogle()
+            const result = await signInWithGoogle()
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/jwt`, { email: result?.user?.email }, { withCredentials: true })
+            console.log(data)
             toast.success('Log In Successful!')
-            navigate(from,{replace:true});
+            navigate(from, { replace: true });
         } catch (error) {
             console.log(error);
             toast.error(error?.message)
@@ -45,8 +48,10 @@ const Login = () => {
         const password = e.target.password.value;
 
         try {
-            await signIn(email, password)
-            navigate(from,{replace:true})
+            const result = await signIn(email, password)
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/jwt`, { email: result?.user?.email }, { withCredentials: true })
+            console.log(data)
+            navigate(from, { replace: true })
             toast.success('SignIn Successful');
         } catch (error) {
             console.log(error)

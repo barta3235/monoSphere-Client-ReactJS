@@ -3,18 +3,25 @@ import { Link } from "react-router-dom"
 import useAuthHook from "../hooks/useAuthHook"
 import axios from "axios"
 import toast from "react-hot-toast"
+import useAxiosSecure from "../hooks/useAxiosSecure"
 
 const MyPostedJobs = () => {
     const [jobs, setJobs] = useState([])
     const { user } = useAuthHook();
+    const axiosSecure = useAxiosSecure()
 
 
     useEffect(() => {
         getData()
     }, [user])
 
+    // const getData = async () => {
+    //     const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs/${user?.email}`,{withCredentials:true})
+    //     setJobs(res.data)
+    // }
+
     const getData = async () => {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs/${user?.email}`)
+        const res = await axiosSecure.get(`/jobs/${user?.email}`)
         setJobs(res.data)
     }
 
@@ -24,7 +31,7 @@ const MyPostedJobs = () => {
         console.log(id);
 
         try {
-            const res = await axios.delete(`${import.meta.env.VITE_API_URL}/jobs/${id}`)
+            const res = await axiosSecure.delete(`jobs/${id}`)
             if (res.data.deletedCount > 0) {
                 toast.success('Job Listing Removed')
                 //refresh UI
@@ -35,8 +42,6 @@ const MyPostedJobs = () => {
             console.log(err);
             toast.error(err)
         }
-
-
     }
 
 

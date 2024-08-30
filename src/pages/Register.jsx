@@ -3,6 +3,7 @@ import useAuthHook from "../hooks/useAuthHook";
 import toast from "react-hot-toast";
 import img from '../assets/images/register.jpg'
 import useAxiosPublic from '../hooks/useAxiosPublic'
+import axios from "axios";
 
 
 const IMAGE_HOSTING_KEY = import.meta.env.VITE_IMGBB_HOSTING_KEY;
@@ -20,7 +21,9 @@ const Register = () => {
     //google sign in
     const handleGoogleSignIn = async () => {
         try {
-            await signInWithGoogle()
+            const result = await signInWithGoogle()
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/jwt`, { email: result?.user?.email }, { withCredentials: true })
+            console.log(data)
             toast.success('Sign in Successful')
             navigate('/');
         } catch (err) {
@@ -49,7 +52,9 @@ const Register = () => {
         try {
             const result = await createUser(email, password)
             await updateUserProfile(name, photoUser)
-            setUser({...user,photoURL:photoUser,displayName:name})
+            setUser({...result?.user,photoURL:photoUser,displayName:name})
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/jwt`, { email: result?.user?.email }, { withCredentials: true })
+            console.log(data)
             toast.success('Registration Successful')
             navigate('/')
         } catch (err) {
