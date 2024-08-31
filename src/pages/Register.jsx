@@ -48,6 +48,12 @@ const Register = () => {
         const photoUser = res.data.data.display_url;
         const email = e.target.email.value;
         const password = e.target.password.value;
+        
+        if(/^(?=.*[a-z])(?=.*[A-Z]).{8}$/.test(password)){
+            toast.warning('Your password should have 8 characters and an upper and lower character')
+            return
+        }
+
 
         try {
             const result = await createUser(email, password)
