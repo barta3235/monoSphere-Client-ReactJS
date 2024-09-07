@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const JobDetails = () => {
 
@@ -13,6 +14,7 @@ const JobDetails = () => {
     const job = useLoaderData();
     const navigate=useNavigate();
     const [startDate, setStartDate] = useState(new Date());
+    const axiosSecure=useAxiosSecure()
 
     const { job_title, category, _id, deadline, description, min_price, max_price, buyers } = job || {}
 
@@ -33,7 +35,7 @@ const JobDetails = () => {
         console.table(bidData);
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/bid`, bidData)
+            const response = await axiosSecure.post(`/bid`, bidData)
             console.log(response.data);
             if (response.data.insertedId) {
                 toast.success('Bid Placed Successfully')
@@ -41,7 +43,8 @@ const JobDetails = () => {
             }
         } catch (err) {
             console.log(err);
-            toast.error(err);
+            toast.error(err.response.data);
+            e.target.reset()
         }
 
 

@@ -1,33 +1,69 @@
-import { useEffect, useState } from "react";
+
 import useAuthHook from "../hooks/useAuthHook";
-import axios from "axios";
 import toast from "react-hot-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const BidRequests = () => {
 
-    const [bids, setBids] = useState([]);
+    // const [bids, setBids] = useState([]);
     const { user } = useAuthHook();
+    const axiosSecure = useAxiosSecure()
+    const queryClient= useQueryClient()
 
-    useEffect(() => {
-        getData();
-    }, [user])
+    const { data: bids = [], isLoading, refetch, isError, error } = useQuery({
+        queryKey: ['bids',user?.email],
+        queryFn: () => getData()
+    })
+
+
+
+
+    // useEffect(() => {
+    //     getData();
+    // }, [user])
 
 
     const getData = async () => {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/bid-request/${user?.email}`)
-        setBids(res.data)
+        const res = await axiosSecure.get(`/bid-request/${user?.email}`)
+        return res.data
     }
+
+    const { mutateAsync } = useMutation({
+        mutationFn: async (id, status) => {
+            const res = await axiosSecure.patch(`/bid/${id}`, { status })
+        },
+        onSuccess: () => {
+            console.log('Data Updated')
+            toast.success('Updated Successfully')
+            // refetch()
+
+            // using key cache
+            // auto refreshes all components that has the query key, not just this component which is done by refetch()
+            queryClient.invalidateQueries({queryKey:['bids']})
+        },
+    })
+
+
+
+
 
     // handleStatus
     const handleStatus = async (id, prevStatus, status) => {
-        if(prevStatus === status) return 
-        const res = await axios.patch(`${import.meta.env.VITE_API_URL}/bid/${id}`, { status })
-        if(res.data.modifiedCount>0){
-            toast.success('Status Updated')
-            getData()
-        }
+        if (prevStatus === status) return
+        await mutateAsync(id, status)
+
     }
 
+
+
+
+
+    if (isLoading) return <p>Data is still loading</p>
+
+    if (isError || error) {
+        console.log(isError, error)
+    }
 
     return (
         <section className='container px-4 mx-auto pt-12'>
@@ -179,7 +215,7 @@ const BidRequests = () => {
                                                     {/* Reject Button */}
                                                     <button
                                                         onClick={() =>
-                                                          handleStatus(bid._id, bid.status, 'Rejected')
+                                                            handleStatus(bid._id, bid.status, 'Rejected')
                                                         }
                                                         disabled={bid.status === 'Complete'}
                                                         className='disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'

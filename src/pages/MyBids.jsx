@@ -2,31 +2,44 @@ import axios from "axios";
 import { useEffect, useState } from "react"
 import useAuthHook from "../hooks/useAuthHook";
 import toast from "react-hot-toast";
+import useAxiosSecure from "../hooks/useAxiosSecure";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
 
 const MyBids = () => {
 
-    const [bids, setBids] = useState([]);
     const { user } = useAuthHook();
+    const axiosSecure= useAxiosSecure()
+    const queryClient=useQueryClient()
 
-    useEffect(() => {
-        getData()
-    }, [user])
+    // useEffect(() => {
+    //     getData()
+    // }, [user])
+    const {data:bids=[],refetch}=useQuery({
+        queryKey:['bids-2'],
+        queryFn:()=> getData()
+    })
 
 
     const getData = async () => {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/my-bids/${user?.email}`)
-        setBids(res.data)
+        const res = await axiosSecure.get(`/my-bids/${user?.email}`)
+        return res.data
     }
 
-    console.log(bids)
+    const {mutateAsync}=useMutation({
+         mutationFn: async (id)=>{
+            const res= await axiosSecure.patch(`/bid/${id}`,{status:'Complete'})
+         },
+         onSuccess:()=>{
+            console.log('Data Updated')
+            toast.success('Updated Successfully')
+            queryClient.invalidateQueries({queryKey:['bids-2']})
+         }
+    })
 
     const handleStatus= async(id)=>{
-        const res= await axios.patch(`${import.meta.env.VITE_API_URL}/bid/${id}`,{status:'Complete'})
-        if(res.data.modifiedCount>0){
-            toast.success('Status Updated')
-            getData()
-        }
+        const res= await axiosSecure.patch(`/bid/${id}`,{status:'Complete'})
+        mutateAsync(id)
     }
 
 
