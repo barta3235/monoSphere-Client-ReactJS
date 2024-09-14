@@ -19,7 +19,7 @@ const useAxiosSecure = () => {
             return res
         },
         async error => {
-            console.log(error.response)
+            console.log('err',error.response)
             if (error.response.status === '401' || error.response.status === '403') {
                 await logOut()
                 navigate('/login')
@@ -28,12 +28,8 @@ const useAxiosSecure = () => {
         }
     )
 
-
-
     // when we send request to the server side
     // axios.interceptors.request 
-
-
 
 
 

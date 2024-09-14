@@ -14,9 +14,7 @@ const BidRequests = () => {
     const { data: bids = [], isLoading, refetch, isError, error } = useQuery({
         queryKey: ['bids',user?.email],
         queryFn: () => getData()
-    })
-
-
+    })  
 
 
     // useEffect(() => {
@@ -37,13 +35,11 @@ const BidRequests = () => {
             console.log('Data Updated')
             toast.success('Updated Successfully')
             // refetch()
-
             // using key cache
             // auto refreshes all components that has the query key, not just this component which is done by refetch()
             queryClient.invalidateQueries({queryKey:['bids']})
         },
-    })
-
+    })  
 
 
 
@@ -52,7 +48,6 @@ const BidRequests = () => {
     const handleStatus = async (id, prevStatus, status) => {
         if (prevStatus === status) return
         await mutateAsync(id, status)
-
     }
 
 
