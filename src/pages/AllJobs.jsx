@@ -17,10 +17,13 @@ const AllJobs = () => {
     //for filter
     const [filter,setFilter]=useState('')
 
+    //for sort
+    const [sort,setSort]=useState('')
+
     const {data}=useQuery({
-        queryKey:['all-jobs',itemsPerPage,currentPage,filter],
+        queryKey:['all-jobs',itemsPerPage,currentPage,filter,sort],
         queryFn: async ()=>{
-            const res = await axiosPublic.get(`/all-jobs?page=${currentPage}&size=${itemsPerPage}&filter=${filter}`)
+            const res = await axiosPublic.get(`/all-jobs?page=${currentPage}&size=${itemsPerPage}&filter=${filter}&sort=${sort}`)
             setJobs(res.data)
             return res.data
         }
@@ -28,7 +31,7 @@ const AllJobs = () => {
     
     // for pagination, total job count
     const {data2}= useQuery({
-        queryKey:['jobs-count',itemsPerPage,currentPage,filter],
+        queryKey:['jobs-count',itemsPerPage,currentPage,filter,sort],
         queryFn: async()=>{
             const res= await axiosPublic.get(`/jobs-count?filter=${filter}`)
             setCount(res.data.count)
@@ -46,6 +49,13 @@ const AllJobs = () => {
     const handlepPaginationButton=(value)=>{
          console.log(value)
          setCurrentPage(value)
+    }
+
+
+    //handle reset
+    const handleReset=()=>{
+        setFilter('')
+        setSort('')
     }
 
 
@@ -90,13 +100,15 @@ const AllJobs = () => {
                             name='sort'
                             id='sort'
                             className='border p-4 rounded-md'
+                            onChange={(e)=>setSort(e.target.value)}
+                            value={sort}
                         >
                             <option value=''>Sort By Deadline</option>
                             <option value='dsc'>Descending Order</option>
                             <option value='asc'>Ascending Order</option>
                         </select>
                     </div>
-                    <button className='btn'>
+                    <button onClick={handleReset} className='btn'>
                         Reset
                     </button>
                 </div>
