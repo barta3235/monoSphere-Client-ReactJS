@@ -6,59 +6,76 @@ import useAxiosPublic from "../hooks/useAxiosPublic";
 
 const AllJobs = () => {
 
-    const axiosPublic=useAxiosPublic()
-    
+    const axiosPublic = useAxiosPublic()
+
     // for pagination
-    const [itemsPerPage,setItemsPerPage]=useState(2) 
-    const [count,setCount]=useState(0)
-    const [jobs,setJobs]=useState([])
-    const [currentPage,setCurrentPage]=useState(1)
-    
+    const [itemsPerPage, setItemsPerPage] = useState(2)
+    const [count, setCount] = useState(0)
+    const [jobs, setJobs] = useState([])
+    const [currentPage, setCurrentPage] = useState(1)
+
     //for filter
-    const [filter,setFilter]=useState('')
+    const [filter, setFilter] = useState('')
+
 
     //for sort
-    const [sort,setSort]=useState('')
+    const [sort, setSort] = useState('')
 
-    const {data}=useQuery({
-        queryKey:['all-jobs',itemsPerPage,currentPage,filter,sort],
-        queryFn: async ()=>{
-            const res = await axiosPublic.get(`/all-jobs?page=${currentPage}&size=${itemsPerPage}&filter=${filter}&sort=${sort}`)
+
+    //for search
+    const [search, setSearch] = useState('')
+
+
+    //for search for handle reset
+    const [searchText, setSearchText] = useState('')
+
+
+    const { data } = useQuery({
+        queryKey: ['all-jobs', itemsPerPage, currentPage, filter, sort, search],
+        queryFn: async () => {
+            const res = await axiosPublic.get(`/all-jobs?page=${currentPage}&size=${itemsPerPage}&filter=${filter}&sort=${sort}&search=${search}`)
             setJobs(res.data)
             return res.data
         }
     })
-    
+
     // for pagination, total job count
-    const {data2}= useQuery({
-        queryKey:['jobs-count',itemsPerPage,currentPage,filter,sort],
-        queryFn: async()=>{
-            const res= await axiosPublic.get(`/jobs-count?filter=${filter}`)
+    const { data2 } = useQuery({
+        queryKey: ['jobs-count', itemsPerPage, currentPage, filter, sort, search],
+        queryFn: async () => {
+            const res = await axiosPublic.get(`/jobs-count?filter=${filter}&search=${search}`)
             setCount(res.data.count)
             return res.data.count
         }
     })
 
-    const numberOfPages = Math.ceil(count/itemsPerPage)
-    const pages= [...Array(numberOfPages).keys()].map(element=> element+1)
+    const numberOfPages = Math.ceil(count / itemsPerPage)
+    const pages = [...Array(numberOfPages).keys()].map(element => element + 1)
 
-   
+
 
 
     //handle pagination button
-    const handlepPaginationButton=(value)=>{
-         console.log(value)
-         setCurrentPage(value)
+    const handlepPaginationButton = (value) => {
+        console.log(value)
+        setCurrentPage(value)
     }
 
 
     //handle reset
-    const handleReset=()=>{
+    const handleReset = () => {
         setFilter('')
         setSort('')
+        setSearch('')
+        setSearchText('')
     }
 
 
+    //handle search
+    const handleSearch = (e) => {
+        e.preventDefault()
+        setSearch(searchText)
+    }
 
 
     return (
@@ -70,7 +87,7 @@ const AllJobs = () => {
                             name='category'
                             id='category'
                             className='border p-4 rounded-lg'
-                            onChange={(e)=>setFilter(e.target.value)}
+                            onChange={(e) => setFilter(e.target.value)}
                             value={filter}
                         >
                             <option value=''>Filter By Category</option>
@@ -80,16 +97,17 @@ const AllJobs = () => {
                         </select>
                     </div>
 
-                    <form>
+                    <form onSubmit={handleSearch}>
                         <div className='flex p-1 overflow-hidden border rounded-lg    focus-within:ring focus-within:ring-opacity-40 focus-within:border-blue-400 focus-within:ring-blue-300'>
                             <input
                                 className='px-6 py-2 text-gray-700 placeholder-gray-500 bg-white outline-none focus:placeholder-transparent'
                                 type='text'
+                                onChange={(e)=>setSearchText(e.target.value)}
+                                value={searchText}
                                 name='search'
                                 placeholder='Enter Job Title'
                                 aria-label='Enter Job Title'
                             />
-
                             <button className='px-1 md:px-4 py-3 text-sm font-medium tracking-wider text-gray-100 uppercase transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:bg-gray-600 focus:outline-none'>
                                 Search
                             </button>
@@ -100,7 +118,7 @@ const AllJobs = () => {
                             name='sort'
                             id='sort'
                             className='border p-4 rounded-md'
-                            onChange={(e)=>setSort(e.target.value)}
+                            onChange={(e) => setSort(e.target.value)}
                             value={sort}
                         >
                             <option value=''>Sort By Deadline</option>
@@ -124,8 +142,8 @@ const AllJobs = () => {
                 {/* Previous Button */}
                 <button
                     className='px-4 py-2 mx-1 text-gray-700 disabled:text-gray-500 capitalize bg-gray-200 rounded-md disabled:cursor-not-allowed disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:bg-blue-500  hover:text-white'
-                    onClick={()=>setCurrentPage(currentPage-1)}
-                    disabled={currentPage===1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
                 >
                     <div className='flex items-center -mx-1'>
                         <svg
@@ -149,7 +167,7 @@ const AllJobs = () => {
                 {/* Numbers */}
                 {pages.map(btnNum => (
                     <button
-                        onClick={()=>handlepPaginationButton(btnNum)}
+                        onClick={() => handlepPaginationButton(btnNum)}
                         key={btnNum}
                         className={`hidden ${btnNum === currentPage ? "bg-blue-500" : ""} px-4 py-2 mx-1 transition-colors duration-300 transform  rounded-md sm:inline hover:bg-blue-500  hover:text-white`}
                     >
@@ -159,8 +177,8 @@ const AllJobs = () => {
                 {/* Next Button */}
                 <button
                     className='px-4 py-2 mx-1 text-gray-700 transition-colors duration-300 transform bg-gray-200 rounded-md hover:bg-blue-500 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:text-white disabled:cursor-not-allowed disabled:text-gray-500'
-                    onClick={()=>setCurrentPage(currentPage+1)}
-                    disabled={currentPage=== numberOfPages}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === numberOfPages}
                 >
                     <div className='flex items-center -mx-1'>
                         <span className='mx-1'>Next</span>
